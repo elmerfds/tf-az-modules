@@ -26,8 +26,9 @@ No modules.
 |------|-------------|------|---------|:--------:|
 | <a name="input_adf_rg_name"></a> [adf\_rg\_name](#input\_adf\_rg\_name) | (Required) The name of the resource group in which to create the Data Factory. | `string` | n/a | yes |
 | <a name="input_adfi_pes"></a> [adfi\_pes](#input\_adfi\_pes) | (Optional) List of private endpoint objects to create for the ADF instance | `any` | `[]` | no |
-| <a name="input_azure_devops_configuration"></a> [azure\_devops\_configuration](#input\_azure\_devops\_configuration) | Azure DevOps configuration for ADF CI/CD integration with ADO. | `any` | `null` | no |
-| <a name="input_identity_config"></a> [identity\_config](#input\_identity\_config) | (Optional) Config block - a group of values containing the identity config, {identity\_type = [SystemAssigned \| UserAssigned \| SystemAssigned, UserAssigned], identity\_ids = [<AAD Object Id>]}.  Config block defaults to null. | `any` | <pre>{<br>  "identity_ids": [],<br>  "identity_type": "SystemAssigned"<br>}</pre> | no |
+| <a name="input_azure_devops_configuration"></a> [azure\_devops\_configuration](#input\_azure\_devops\_configuration) | Azure DevOps configuration for ADF CI/CD integration with ADO. | <pre>object({<br>  account_name    = string<br>  branch_name     = string<br>  project_name    = string<br>  repository_name = string<br>  root_folder     = string<br>  tenant_id       = string<br>})</pre> | `null` | no |
+| <a name="input_github_configuration"></a> [github\_configuration](#input\_github\_configuration) | GitHub configuration for ADF CI/CD integration. | <pre>object({<br>  account_name    = string<br>  branch_name     = string<br>  git_url         = string<br>  repository_name = string<br>  root_folder     = string<br>})</pre> | `null` | no |
+| <a name="input_identity_config"></a> [identity\_config](#input\_identity\_config) | (Optional) Config block - a group of values containing the identity config, {identity\_type = [SystemAssigned \| UserAssigned \| SystemAssigned, UserAssigned], identity\_ids = [<AAD Object Id>]}. Config block defaults to null. | `any` | <pre>{<br>  "identity_ids": [],<br>  "identity_type": "SystemAssigned"<br>}</pre> | no |
 | <a name="input_location"></a> [location](#input\_location) | (Required) Specifies the supported Azure location where the resource exists. Changing this forces a new resource to be created. | `string` | n/a | yes |
 | <a name="input_managed_virtual_network_enabled"></a> [managed\_virtual\_network\_enabled](#input\_managed\_virtual\_network\_enabled) | (Optional) Is Managed Virtual Network enabled? | `bool` | `true` | no |
 | <a name="input_name"></a> [name](#input\_name) | (Required) Specifies the name of the Data Factory. Changing this forces a new resource to be created. Must be globally unique. See the https://learn.microsoft.com/en-gb/azure/data-factory/naming-rules for all restrictions. | `string` | n/a | yes |
@@ -50,7 +51,7 @@ No modules.
 | data-factory-validate | Triggered on pull request and execute terraform validate on module |
 
 ## Code Example
-```
+```hcl
 #================================================================================================
 # Data Factory Module Call
 #================================================================================================
@@ -62,17 +63,23 @@ module "data_factories" {
   location    = var.location
   
   tags        = merge(local.tags, { "Deployment-date" = formatdate("YYYY-MM-DD hh:mm ZZZ", timestamp()) })
-}
-```
 
-```
-#================================================================================================
-# Data Factory Module tfvars
-#================================================================================================
-data_factories = [
-  {
-    name               = "adf-01"
-    resource_group_key = "services-rg-01"
+  # Optional: Add Azure DevOps configuration
+  azure_devops_configuration = {
+    account_name    = "your-ado-account"
+    branch_name     = "main"
+    project_name    = "your-project"
+    repository_name = "your-repo"
+    root_folder     = "/"
+    tenant_id       = "your-tenant-id"
   }
-]
-```
+
+  # Optional: Add GitHub configuration
+  github_configuration = {
+    account_name    = "your-github-account"
+    branch_name     = "main"
+    git_url         = "https://github.com"
+    repository_name = "your-repo"
+    root_folder     = "/"
+  }
+}
